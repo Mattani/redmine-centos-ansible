@@ -8,10 +8,18 @@
 
 - name: Rubyがダウンロード済みか確認
   command:
-    test -f {{ work_dir }}/{{ ruby_archive_version }}
+    test -f {{ work_dir }}/{{ ruby_archive_name }}
   register:
     ruby_src_test_vars
-  failed_when: ruby_test_vars.rc not in [0, 1]
+  failed_when: ruby_src_test_vars.rc not in [0, 1]
+  changed_when: false
+
+- name: Rubyのソースコードが展開済みか確認
+  command:
+    test -f {{ work_dir }}/{{ ruby_archive_version }}
+  register:
+    ruby_src_extracted_test_vars
+  failed_when: ruby_src_extracted_test_vars.rc not in [0, 1]
   changed_when: false
 
 - name: Rubyのソースコードのダウンロード
@@ -25,7 +33,7 @@
     src={{ work_dir }}/{{ ruby_archive_name }}
     dest={{ work_dir }}
     copy=no
-  when: ruby_test_vars.rc == 1 and ruby_src_test_vars.rc == 1
+  when: ruby_test_vars.rc == 1 and ruby_src_extracted_test_vars.rc == 1
 
 - name: Rubyのビルド1 (configure)
   command:
